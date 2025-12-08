@@ -4,6 +4,8 @@ import com.gustavo.user_service.dto.UserDto;
 import com.gustavo.user_service.model.User;
 import com.gustavo.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User updateUser(UserDto userDto) {
         User user = userRepository.findUserById(userDto.id())
@@ -26,7 +29,8 @@ public class UserService {
         }
 
         if(userDto.password() != null){
-            user.setPassword(userDto.password());
+            String hashedPassword = passwordEncoder.encode(userDto.password());
+            user.setPassword(hashedPassword);
         }
 
         return userRepository.save(user);
