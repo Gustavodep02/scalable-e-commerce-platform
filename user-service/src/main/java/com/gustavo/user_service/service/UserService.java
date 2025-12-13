@@ -24,6 +24,10 @@ public class UserService {
         if(userDto.email() != null && userRepository.existsByEmailAndIdNot(userDto.email(), userDto.id())){
             throw new RuntimeException("Email already in use");
         }
+        if(userDto.email() != null){
+                user.setEmail(userDto.email());
+        }
+
         if(userDto.name() != null){
             user.setName(userDto.name());
         }
