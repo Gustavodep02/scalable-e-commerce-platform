@@ -1,12 +1,12 @@
 package com.gustavo.product_service.model;
 
 
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.UUID;
 
+@Entity
 @Data
 @Table(name = "TB_PRODUCT")
 @Getter
@@ -15,6 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Product {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     private String name;
     private String description;

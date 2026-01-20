@@ -1,6 +1,7 @@
 package com.gustavo.product_service.controller;
 
 import com.gustavo.product_service.dto.CreateProductDto;
+import com.gustavo.product_service.dto.ProductDetailsResponseDto;
 import com.gustavo.product_service.dto.UpdateProductDto;
 import com.gustavo.product_service.model.Product;
 import com.gustavo.product_service.service.ProductService;
@@ -35,9 +36,21 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable UUID id) {
-        return ResponseEntity.ok(productService.getProductById(id));
+    public ResponseEntity<ProductDetailsResponseDto> getProductById(@PathVariable UUID id) {
+
+        Product product = productService.getProductById(id);
+
+        return ResponseEntity.ok(
+                new ProductDetailsResponseDto(
+                        product.getId(),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        product.getStock()
+                )
+        );
     }
+
 
     @PatchMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable UUID id, @RequestBody @Valid UpdateProductDto updateProductDTO) {
