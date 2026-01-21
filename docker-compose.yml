@@ -78,7 +78,34 @@ services:
       volumes:
         - cart_db_data:/var/lib/postgresql/data
 
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: order-db
+      DB_PORT: 5432
+      DB_USER: order
+      DB_PASS: password
+    depends_on:
+      - order-db
+
+  order-db:
+    image: postgres:16
+    container_name: order-db
+    environment:
+      POSTGRES_USER: order
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: orders_db
+    ports:
+      - "5436:5432"
+    volumes:
+      - order_db_data:/var/lib/postgresql/data
+
 volumes:
   user_db_data:
   product_db_data:
   cart_db_data:
+  order_db_data:
