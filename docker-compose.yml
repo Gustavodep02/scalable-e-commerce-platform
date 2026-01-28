@@ -103,7 +103,6 @@ services:
       - "5436:5432"
     volumes:
       - order_db_data:/var/lib/postgresql/data
-      -
   payment-service:
     build: ./payment-service
     container_name: payment-service
@@ -135,3 +134,4 @@ volumes:
   product_db_data:
   cart_db_data:
   order_db_data:
+  payment_db_data:
