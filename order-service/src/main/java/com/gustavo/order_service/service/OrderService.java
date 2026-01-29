@@ -3,8 +3,11 @@ package com.gustavo.order_service.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gustavo.order_service.client.PaymentClient;
 import com.gustavo.order_service.dto.CreateOrderDto;
+import com.gustavo.order_service.dto.CreateOrderResponse;
 import com.gustavo.order_service.dto.OrderItemDto;
+import com.gustavo.order_service.dto.PaymentRequest;
 import com.gustavo.order_service.event.JsonMessageOrderCreated;
 import com.gustavo.order_service.exception.OrderNotFoundException;
 import com.gustavo.order_service.model.Order;
@@ -28,6 +31,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final PaymentClient paymentClient;
 
     public void publishOrderCreatedEvent(Order order) {
 
@@ -66,7 +70,7 @@ public class OrderService {
         return event;
     }
     @Transactional
-    public Order createOrder(CreateOrderDto createOrderDto) {
+    public CreateOrderResponse createOrder(CreateOrderDto createOrderDto) {
         var order = new Order();
         order.setUserId(createOrderDto.userId());
         order.setStatus(OrderStatus.CREATED);
@@ -87,7 +91,11 @@ public class OrderService {
 
         publishOrderCreatedEvent(saved);
 
-        return saved;
+        var req = new PaymentRequest((int) (saved.getTotalPrice()*100),"brl","Order #"+saved.getOrderId() );
+
+        String checkoutUrl = paymentClient.createPayment(saved.getOrderId(), req);
+
+        return new CreateOrderResponse(saved,checkoutUrl);
     }
     @Transactional
     public Order updateOrderStatus(UUID orderId, OrderStatus status) {

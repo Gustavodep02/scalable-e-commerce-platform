@@ -1,6 +1,7 @@
 package com.gustavo.order_service.controller;
 
 import com.gustavo.order_service.dto.CreateOrderDto;
+import com.gustavo.order_service.dto.CreateOrderResponse;
 import com.gustavo.order_service.model.Order;
 import com.gustavo.order_service.model.OrderStatus;
 import com.gustavo.order_service.service.OrderService;
@@ -19,8 +20,9 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody @Valid CreateOrderDto createOrderDto) {
-        Order order = orderService.createOrder(createOrderDto);
+    public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody @Valid CreateOrderDto createOrderDto) {
+        var order = orderService.createOrder(createOrderDto);
+
         return ResponseEntity.ok(order);
     }
 
