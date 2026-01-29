@@ -7,6 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public record CreateOrderDto(@NotNull UUID userId,
-                             @NotNull List<OrderItemDto> items,
-                             @NotBlank String shippingAddress) {
+                             @NotNull List<OrderItemDto> items) {
 }

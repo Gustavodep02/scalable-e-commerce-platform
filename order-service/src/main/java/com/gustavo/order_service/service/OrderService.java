@@ -1,28 +1,65 @@
 package com.gustavo.order_service.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gustavo.order_service.dto.CreateOrderDto;
+import com.gustavo.order_service.dto.OrderItemDto;
+import com.gustavo.order_service.event.JsonMessageOrderCreated;
 import com.gustavo.order_service.exception.OrderNotFoundException;
 import com.gustavo.order_service.model.Order;
 import com.gustavo.order_service.model.OrderItem;
 import com.gustavo.order_service.model.OrderStatus;
 import com.gustavo.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Service;
+
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    public void publishOrderCreatedEvent(Order order) {
+
+        JsonMessageOrderCreated event = new JsonMessageOrderCreated();
+        event.setOrderId(order.getOrderId());
+        event.setUserId(order.getUserId());
+
+        event.setItems(
+                order.getItems()
+                        .stream()
+                        .map(item -> new OrderItemDto(
+                                item.getProductId(),
+                                item.getQuantity(),
+                                item.getUnitPrice()
+                        ))
+                        .toList()
+        );
+
+        event.setTotalPrice(order.getTotalPrice());
+
+        kafkaTemplate.send("ORDER.CREATED", event);
+    }
+
 
     public Order createOrder(CreateOrderDto createOrderDto) {
         var order = new Order();
         order.setUserId(createOrderDto.userId());
-        for(var itemDto : createOrderDto.items()) {
+        order.setStatus(OrderStatus.CREATED);
+        order.setCreatedAt(Instant.now());
+
+        for (var itemDto : createOrderDto.items()) {
             var orderItem = new OrderItem();
             orderItem.setProductId(itemDto.productId());
             orderItem.setQuantity(itemDto.quantity());
@@ -31,10 +68,13 @@ public class OrderService {
             orderItem.setOrder(order);
             order.getItems().add(orderItem);
         }
-        order.setStatus(OrderStatus.CREATED);
-        order.setCreatedAt(Instant.now());
+
         order.calculateTotalAmount();
-        return orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+
+        publishOrderCreatedEvent(saved);
+
+        return saved;
     }
 
     public Order updateOrderStatus(UUID orderId, OrderStatus status) {
