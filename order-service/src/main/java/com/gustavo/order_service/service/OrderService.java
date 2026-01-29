@@ -11,6 +11,7 @@ import com.gustavo.order_service.model.Order;
 import com.gustavo.order_service.model.OrderItem;
 import com.gustavo.order_service.model.OrderStatus;
 import com.gustavo.order_service.repository.OrderRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.support.GenericMessage;
@@ -21,8 +22,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toList;
-
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -32,10 +31,27 @@ public class OrderService {
 
     public void publishOrderCreatedEvent(Order order) {
 
+        JsonMessageOrderCreated event = CreateJsonMessageOrder(order);
+
+        kafkaTemplate.send("ORDER.CREATED", event);
+    }
+    @Transactional
+    public void publishOrderStatusEvent(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found"));
+        JsonMessageOrderCreated event = CreateJsonMessageOrder(order);
+        String topic = switch (order.getStatus()) {
+            case PAID -> "ORDER.PAID";
+            case CANCELLED -> "ORDER.CANCELLED";
+            default -> null;
+        };
+        kafkaTemplate.send(topic, event);
+    }
+    @Transactional
+    public JsonMessageOrderCreated CreateJsonMessageOrder(Order order) {
         JsonMessageOrderCreated event = new JsonMessageOrderCreated();
         event.setOrderId(order.getOrderId());
         event.setUserId(order.getUserId());
-
         event.setItems(
                 order.getItems()
                         .stream()
@@ -46,13 +62,10 @@ public class OrderService {
                         ))
                         .toList()
         );
-
         event.setTotalPrice(order.getTotalPrice());
-
-        kafkaTemplate.send("ORDER.CREATED", event);
+        return event;
     }
-
-
+    @Transactional
     public Order createOrder(CreateOrderDto createOrderDto) {
         var order = new Order();
         order.setUserId(createOrderDto.userId());
@@ -76,12 +89,15 @@ public class OrderService {
 
         return saved;
     }
-
+    @Transactional
     public Order updateOrderStatus(UUID orderId, OrderStatus status) {
         var order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found"));
         order.setStatus(status);
-        return orderRepository.save(order);
+
+        var saved = orderRepository.save(order);
+        publishOrderStatusEvent(saved.getOrderId());
+        return saved;
     }
 
     public Order getOrderById(UUID orderId) {
