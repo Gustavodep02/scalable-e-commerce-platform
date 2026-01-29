@@ -1,10 +1,13 @@
 package com.gustavo.payment_service.service;
 
 import com.gustavo.payment_service.dto.StripeCheckoutDto;
+import com.gustavo.payment_service.event.JsonMessage;
 import com.gustavo.payment_service.gateway.PaymentGateway;
 import com.gustavo.payment_service.model.Payment;
 import com.gustavo.payment_service.repository.PaymentRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
@@ -16,7 +19,21 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PaymentGateway paymentGateway;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
+    public void publishPaymentEvent(Payment payment) {
+        String topic = switch (payment.getStatus()) {
+            case PAID -> "PAYMENT.SUCCEEDED";
+            case FAILED -> "PAYMENT.FAILED";
+            default -> null;
+        };
+        JsonMessage event = new JsonMessage();
+        event.setOrderId(payment.getOrderId());
+        if (topic != null) {
+            kafkaTemplate.send(topic, event);
+        }
+    }
+    @Transactional
     public Payment createCheckout(UUID orderId, Long amount) {
 
         StripeCheckoutDto checkout =
@@ -32,14 +49,19 @@ public class PaymentService {
 
         return paymentRepository.save(payment);
     }
+    @Transactional
     public void markAsPaid(String sessionId) {
         Payment payment = paymentRepository.findBySessionId(sessionId);
         payment.setStatus(PAID);
-        paymentRepository.save(payment);
+        var saved = paymentRepository.save(payment);
+        publishPaymentEvent(saved);
     }
+    @Transactional
     public void markAsFailed(String sessionId) {
         Payment payment = paymentRepository.findBySessionId(sessionId);
         payment.setStatus(FAILED);
-        paymentRepository.save(payment);
+        var saved = paymentRepository.save(payment);
+        publishPaymentEvent(saved);
+
     }
 }
