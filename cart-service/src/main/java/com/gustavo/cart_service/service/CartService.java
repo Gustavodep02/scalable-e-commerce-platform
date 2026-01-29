@@ -2,6 +2,7 @@ package com.gustavo.cart_service.service;
 
 import com.gustavo.cart_service.model.Cart;
 import com.gustavo.cart_service.repository.CartRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class CartService {
                 .orElseGet(() -> cartRepository.save(new Cart(null, userId, 0.0, new HashSet<>())));
     }
 
+    @Transactional
     public void clearCart(UUID userId) {
         Cart cart = getOrCreateCart(userId);
         cart.getItems().clear();

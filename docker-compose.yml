@@ -1,5 +1,41 @@
 services:
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: myzookeeper
+    ports:
+      - "22181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: mykafka
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: mykafka-ui
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    depends_on:
+      - kafka
+      - zookeeper
   user-service:
     build: ./user-service
     container_name: user-service
@@ -27,56 +63,56 @@ services:
       - user_db_data:/var/lib/postgresql/data
 
   product-service:
-      build: ./product-service
-      container_name: product-service
-      ports:
-        - "8082:8082"
-      environment:
-        SPRING_PROFILES_ACTIVE: docker
-        DB_HOST: products-db
-        DB_PORT: 5432
-        DB_USER: product
-        DB_PASS: password
-      depends_on:
-        - product-db
+    build: ./product-service
+    container_name: product-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: products-db
+      DB_PORT: 5432
+      DB_USER: product
+      DB_PASS: password
+    depends_on:
+      - product-db
 
   product-db:
-      image: postgres:16
-      container_name: product-db
-      environment:
-        POSTGRES_USER: product
-        POSTGRES_PASSWORD: password
-        POSTGRES_DB: products_db
-      ports:
-        - "5434:5432"
-      volumes:
-        - product_db_data:/var/lib/postgresql/data
+    image: postgres:16
+    container_name: product-db
+    environment:
+      POSTGRES_USER: product
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: products_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - product_db_data:/var/lib/postgresql/data
 
   cart-service:
-      build: ./cart-service
-      container_name: cart-service
-      ports:
-        - "8083:8083"
-      environment:
-        SPRING_PROFILES_ACTIVE: docker
-        DB_HOST: cart-db
-        DB_PORT: 5432
-        DB_USER: cart
-        DB_PASS: password
-      depends_on:
-        - cart-db
+    build: ./cart-service
+    container_name: cart-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: cart-db
+      DB_PORT: 5432
+      DB_USER: cart
+      DB_PASS: password
+    depends_on:
+      - cart-db
 
   cart-db:
-      image: postgres:16
-      container_name: carts_db
-      environment:
-        POSTGRES_USER: cart
-        POSTGRES_PASSWORD: password
-        POSTGRES_DB: carts_db
-      ports:
-        - "5435:5432"
-      volumes:
-        - cart_db_data:/var/lib/postgresql/data
+    image: postgres:16
+    container_name: carts_db
+    environment:
+      POSTGRES_USER: cart
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: carts_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - cart_db_data:/var/lib/postgresql/data
 
   order-service:
     build: ./order-service
