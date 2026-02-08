@@ -16,15 +16,35 @@ import java.io.IOException;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
+    private String internalToken = "notif-internal-123";
+
     @Autowired
     TokenService tokenService;
+
     @Autowired
     UserRepository userRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
+
         String path = request.getRequestURI();
         if (path.startsWith("/auth/login") || path.startsWith("/auth/register")){
+            filterChain.doFilter(request, response);
+            return;
+        }
+        String internalHeader = request.getHeader("X-Internal-Token");
+        if (internalHeader != null && internalHeader.equals(internalToken)) {
+            var authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            "INTERNAL_SERVICE",
+                            null,
+                            null
+                    );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);
             return;
         }
@@ -33,7 +53,12 @@ public class SecurityFilter extends OncePerRequestFilter {
             var email = tokenService.validateToken(token);
             UserDetails user = userRepository.findByEmail(email);
 
-            var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            var authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            user.getAuthorities()
+                    );
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         filterChain.doFilter(request, response);
