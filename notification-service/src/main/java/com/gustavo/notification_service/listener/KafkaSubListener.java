@@ -1,8 +1,11 @@
 package com.gustavo.notification_service.listener;
 
 import com.gustavo.notification_service.model.JsonMessage;
+import com.gustavo.notification_service.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
@@ -12,12 +15,13 @@ import tools.jackson.databind.ObjectMapper;
 public class KafkaSubListener {
 
     private final ObjectMapper objectMapper;
+    private final NotificationService notificationService;
 
     @KafkaListener(topics = "ORDER.CREATED", containerFactory = "kafkaListenerContainerFactory")
     public void consumeOrderCreated(String event) {
         try {
             JsonMessage message = objectMapper.readValue(event, JsonMessage.class);
-            // Aqui você pode chamar o serviço de notificação para enviar uma notificação ao usuário
+            notificationService.sendNotificationCreated(message);
         } catch (Exception e) {
             System.err.println("Erro ao converter JSON: " + e.getMessage());
         }
@@ -27,7 +31,7 @@ public class KafkaSubListener {
     public void consumeOrderCancelled(String event) {
         try {
             JsonMessage message = objectMapper.readValue(event, JsonMessage.class);
-            // Aqui você pode chamar o serviço de notificação para enviar uma notificação ao usuário
+            notificationService.sendNotificationCancelled(message);
         } catch (Exception e) {
             System.err.println("Erro ao converter JSON: " + e.getMessage());
         }
@@ -36,7 +40,7 @@ public class KafkaSubListener {
     public void consumeOrderPaid(String event) {
         try {
             JsonMessage message = objectMapper.readValue(event, JsonMessage.class);
-            // Aqui você pode chamar o serviço de notificação para enviar uma notificação ao usuário
+            notificationService.sendNotificationPaid(message);
         } catch (Exception e) {
             System.err.println("Erro ao converter JSON: " + e.getMessage());
         }

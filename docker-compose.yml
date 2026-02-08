@@ -164,6 +164,31 @@ services:
       - "5437:5432"
     volumes:
       - payment_db_data:/var/lib/postgresql/data
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: notification-db
+      DB_PORT: 5432
+      DB_USER: notification
+      DB_PASS: password
+    depends_on:
+      - notification-db
+
+  notification-db:
+    image: postgres:16
+    container_name: notification-db
+    environment:
+      POSTGRES_USER: notification
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: notifications_db
+    ports:
+      - "5438:5432"
+    volumes:
+      - notification_db_data:/var/lib/postgresql/data
 
 volumes:
   user_db_data:
@@ -171,3 +196,4 @@ volumes:
   cart_db_data:
   order_db_data:
   payment_db_data:
+  notification_db_data:
