@@ -1,27 +1,33 @@
 spring:
   cloud:
     gateway:
-      routes:
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/users/**,/auth/**
-        - id: product-service
-          uri: lb://product-service
-          predicates:
-              - Path=/products/**
-        - id: cart-service
-          uri: lb://cart-service
-          predicates:
-              - Path=/carts/**,/cart-items/**
-        - id: order-service
-          uri: lb://order-service
-          predicates:
-              - Path=/orders/**
-        - id: payment-service
-          uri: lb://payment-service
-          predicates:
-              - Path=/payments/**
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                  - Path=/users/**,/auth/**
+            - id: product-service
+              uri: lb://product-service
+              predicates:
+                    - Path=/products/**
+            - id: cart-service
+              uri: lb://cart-service
+              predicates:
+                  - Path=/carts/**,/cart-items/**
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                  - Path=/orders/**
+            - id: payment-service
+              uri: lb://payment-service
+              predicates:
+                  - Path=/payments/**
+    discovery:
+      locator:
+        enabled: true
+        lower-case-service-id: true
   application:
     name: api-gateway
 server:
@@ -32,3 +38,7 @@ eureka:
             defaultZone: http://eureka:8761/eureka/
       register-with-eureka: true
       fetch-registry: true
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.http.server.reactive: DEBUG
