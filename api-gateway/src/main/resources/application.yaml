@@ -38,7 +38,9 @@ eureka:
             defaultZone: http://eureka:8761/eureka/
       register-with-eureka: true
       fetch-registry: true
+jwt:
+  secret: ${JWT_SECRET:39616e41306663523363363346526134}
 logging:
   level:
-    org.springframework.cloud.gateway: TRACE
-    org.springframework.http.server.reactive: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
