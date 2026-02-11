@@ -206,6 +206,19 @@ services:
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
       - eureka
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+
+  grafana:
+    image:  grafana/grafana:latest
+    ports:
+      - "3000:3000"
 
 
 volumes:
@@ -215,3 +228,5 @@ volumes:
   order_db_data:
   payment_db_data:
   notification_db_data:
+  prometheus_data:
+  grafana_data:

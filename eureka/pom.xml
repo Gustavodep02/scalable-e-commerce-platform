@@ -12,7 +12,7 @@
 	<artifactId>eureka</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>eureka</name>
-	<description>Service idscovery with Eureka</description>
+	<description>Service discovery with Eureka</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -35,7 +35,6 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
