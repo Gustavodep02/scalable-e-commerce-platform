@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 public class TokenService {
@@ -24,6 +25,7 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("scalable-e-commerce-api")
                     .withSubject(user.getEmail())
+                    .withClaim("roles", List.of(user.getRole().name()))
                     .withExpiresAt(generateExpirationDate())
                     .sign(algorithm);
         }catch (JWTCreationException exception){
