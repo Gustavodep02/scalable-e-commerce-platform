@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.gustavo</groupId>
-	<artifactId>cart_service</artifactId>
+	<artifactId>cart-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>cart_service</name>
 	<description>Shopping cart service</description>
