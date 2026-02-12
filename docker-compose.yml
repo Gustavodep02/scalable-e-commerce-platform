@@ -219,7 +219,45 @@ services:
     image:  grafana/grafana:latest
     ports:
       - "3000:3000"
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
 
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.0
+    container_name: logstash
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.0
+    container_name: kibana
+    ports:
+        - "5601:5601"
+    environment:
+        ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+        ELASTICSEARCH_URL: http://elasticsearch:9200
+    depends_on:
+        - elasticsearch
 
 volumes:
   user_db_data:
@@ -230,3 +268,4 @@ volumes:
   notification_db_data:
   prometheus_data:
   grafana_data:
+  es-data:

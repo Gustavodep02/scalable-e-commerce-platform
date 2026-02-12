@@ -4,9 +4,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gustavo.cart_service.model.JsonMessage;
 import com.gustavo.cart_service.service.CartService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class OrderCreatedListener {
 
@@ -21,10 +23,11 @@ public class OrderCreatedListener {
     @KafkaListener(topics = "ORDER.CREATED", containerFactory = "kafkaListenerContainerFactory")
     public void consumeOrderCreated(String event) {
         try {
+            log.info("Received ORDER.CREATED event: {}", event);
             JsonMessage message = objectMapper.readValue(event, JsonMessage.class);
             cartService.clearCart(message.getUserId());
         } catch (Exception e) {
-            System.err.println("Erro ao converter JSON: " + e.getMessage());
+            log.error("Error converting JSON for ORDER.CREATED event: {}", e.getMessage());
         }
     }
 }

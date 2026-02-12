@@ -8,10 +8,12 @@ import com.gustavo.cart_service.model.CartItem;
 import com.gustavo.cart_service.repository.CartItemRepository;
 import com.gustavo.cart_service.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CartItemService {
@@ -38,6 +40,8 @@ public class CartItemService {
                 });
         if (product.stock() < (cartItem.getQuantity() + quantity)
         ) {
+            log.error("Insufficient stock adding to cart for product: {}. Requested: {}, Available: {}",
+                    product.name(), cartItem.getQuantity() + quantity, product.stock());
             throw new OutOfStockException("Insufficient stock for product: " + product.name());
 
         }
@@ -73,6 +77,8 @@ public class CartItemService {
         } else {
             ProductResponseDto product = productClient.getProduct(productId);
             if (product.stock() < quantity) {
+                log.error("Insufficient stock updating cart item for product: {}. Requested: {}, Available: {}",
+                        product.name(), quantity, product.stock());
                 throw new OutOfStockException("Insufficient stock for product: " + product.name());
             }
             cartItem.setQuantity(quantity);

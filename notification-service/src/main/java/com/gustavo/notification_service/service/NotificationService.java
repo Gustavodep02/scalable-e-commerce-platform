@@ -9,9 +9,11 @@ import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -36,7 +38,7 @@ public class NotificationService {
             Response response = sg.api(request);
         }
         catch (Exception ex) {
-            System.err.println("Erro ao enviar email: " + ex.getMessage());
+            log.error("Error sending cancellation email: {}", ex.getMessage());
         }
     }
     public void sendNotificationPaid(JsonMessage message) {
@@ -57,7 +59,7 @@ public class NotificationService {
             Response response = sg.api(request);
         }
         catch (Exception ex) {
-            System.err.println("Erro ao enviar email: " + ex.getMessage());
+            log.error("Error sending paid email: {}", ex.getMessage());
         }
     }
     public void sendNotificationCreated(JsonMessage message) {
@@ -78,7 +80,7 @@ public class NotificationService {
             Response response = sg.api(request);
         }
         catch (Exception ex) {
-            System.err.println("Erro ao enviar email: " + ex.getMessage());
+            log.error("Error sending created email: {}", ex.getMessage());
         }
     }
 }

@@ -8,6 +8,7 @@ import com.gustavo.user_service.model.User;
 import com.gustavo.user_service.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -36,6 +38,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid AuthDto authDTO){
+        log.info("Received login request for email: {}", authDTO.email());
         try {
             var usernamePassword = new UsernamePasswordAuthenticationToken(
                     authDTO.email(),
@@ -46,13 +49,16 @@ public class AuthController {
             return ResponseEntity.ok(new LoginResponseDto(token));
 
         } catch (BadCredentialsException e) {
+            log.error("Authentication failed for email: {}", authDTO.email(), e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterDto registerDTO){
+        log.info("Received registration request for email: {}", registerDTO.email());
         if(this.userRepository.findByEmail(registerDTO.email()) != null ){
+            log.warn("Registration failed: Email {} already in use", registerDTO.email());
             return ResponseEntity.badRequest().body("Email already in use");
         }
 

@@ -7,12 +7,14 @@ import com.gustavo.payment_service.model.Payment;
 import com.gustavo.payment_service.repository.PaymentRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 import static com.gustavo.payment_service.model.PaymentStatus.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -30,6 +32,7 @@ public class PaymentService {
         JsonMessage event = new JsonMessage();
         event.setOrderId(payment.getOrderId());
         if (topic != null) {
+            log.info("Publishing event to topic {}: {}", topic, event);
             kafkaTemplate.send(topic, event);
         }
     }
@@ -51,6 +54,7 @@ public class PaymentService {
     }
     @Transactional
     public void markAsPaid(String sessionId) {
+        log.info("Marking payment as PAID for sessionId: {}", sessionId);
         Payment payment = paymentRepository.findBySessionId(sessionId);
         payment.setStatus(PAID);
         var saved = paymentRepository.save(payment);
@@ -58,6 +62,7 @@ public class PaymentService {
     }
     @Transactional
     public void markAsFailed(String sessionId) {
+        log.info("Marking payment as FAILED for sessionId: {}", sessionId);
         Payment payment = paymentRepository.findBySessionId(sessionId);
         payment.setStatus(FAILED);
         var saved = paymentRepository.save(payment);

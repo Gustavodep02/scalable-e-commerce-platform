@@ -16,6 +16,7 @@ import com.gustavo.order_service.model.OrderStatus;
 import com.gustavo.order_service.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -36,7 +38,7 @@ public class OrderService {
     public void publishOrderCreatedEvent(Order order) {
 
         JsonMessageOrderCreated event = CreateJsonMessageOrder(order);
-
+        log.info("Publishing ORDER.CREATED event: {}", event);
         kafkaTemplate.send("ORDER.CREATED", event);
     }
     @Transactional
@@ -49,6 +51,7 @@ public class OrderService {
             case CANCELLED -> "ORDER.CANCELLED";
             default -> null;
         };
+        log.info("Publishing event to topic {}: {}", topic, event);
         kafkaTemplate.send(topic, event);
     }
     @Transactional

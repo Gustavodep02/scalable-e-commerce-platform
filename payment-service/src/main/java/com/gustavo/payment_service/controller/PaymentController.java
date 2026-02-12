@@ -7,6 +7,7 @@ import com.gustavo.payment_service.service.PaymentService;
 import com.stripe.Stripe;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.UUID;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/payments")
@@ -36,6 +38,7 @@ public class PaymentController {
             @PathVariable UUID orderId,
             @RequestBody CheckoutRequestDto request
     ) {
+        log.info("Received checkout request for orderId: {} with amount: {}", orderId, request.amount());
         Payment payment =
                 paymentService.createCheckout(orderId, request.amount());
 
