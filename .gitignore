@@ -1,0 +1,21 @@
+# Environment variables
+.env
+*.env
+!.env.example
+
+# IDE
+.idea/
+*.iml
+
+# Build
+target/
+build/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+

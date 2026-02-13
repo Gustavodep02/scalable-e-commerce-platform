@@ -15,8 +15,8 @@ services:
     ports:
       - "29092:29092"
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: ${KAFKA_BROKER_ID}
+      KAFKA_ZOOKEEPER_CONNECT: ${KAFKA_ZOOKEEPER_CONNECT}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
@@ -31,11 +31,12 @@ services:
       - "8090:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_CLUSTERS_0_ZOOKEEPER: ${KAFKA_ZOOKEEPER_CONNECT}
     depends_on:
       - kafka
       - zookeeper
+
   user-service:
     build: ./user-service
     container_name: user-service
@@ -43,10 +44,13 @@ services:
       - "8081:8081"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      DB_HOST: user-db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASS: postgres
+      USER_DB_HOST: ${USER_DB_HOST}
+      USER_DB_PORT: ${USER_DB_PORT}
+      USER_DB_NAME: ${USER_DB_NAME}
+      USER_DB_USER: ${USER_DB_USER}
+      USER_DB_PASSWORD: ${USER_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      EUREKA_URL: ${EUREKA_URL}
     depends_on:
       - user-db
 
@@ -54,9 +58,9 @@ services:
     image: postgres:16
     container_name: user-db
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: users_db
+      POSTGRES_USER: ${USER_DB_USER}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+      POSTGRES_DB: ${USER_DB_NAME}
     ports:
       - "5433:5432"
     volumes:
@@ -69,10 +73,12 @@ services:
       - "8082:8082"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      DB_HOST: products-db
-      DB_PORT: 5432
-      DB_USER: product
-      DB_PASS: password
+      PRODUCT_DB_HOST: ${PRODUCT_DB_HOST}
+      PRODUCT_DB_PORT: ${PRODUCT_DB_PORT}
+      PRODUCT_DB_NAME: ${PRODUCT_DB_NAME}
+      PRODUCT_DB_USER: ${PRODUCT_DB_USER}
+      PRODUCT_DB_PASSWORD: ${PRODUCT_DB_PASSWORD}
+      EUREKA_URL: ${EUREKA_URL}
     depends_on:
       - product-db
 
@@ -80,9 +86,9 @@ services:
     image: postgres:16
     container_name: product-db
     environment:
-      POSTGRES_USER: product
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: products_db
+      POSTGRES_USER: ${PRODUCT_DB_USER}
+      POSTGRES_PASSWORD: ${PRODUCT_DB_PASSWORD}
+      POSTGRES_DB: ${PRODUCT_DB_NAME}
     ports:
       - "5434:5432"
     volumes:
@@ -95,10 +101,12 @@ services:
       - "8083:8083"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      DB_HOST: cart-db
-      DB_PORT: 5432
-      DB_USER: cart
-      DB_PASS: password
+      CART_DB_HOST: ${CART_DB_HOST}
+      CART_DB_PORT: ${CART_DB_PORT}
+      CART_DB_NAME: ${CART_DB_NAME}
+      CART_DB_USER: ${CART_DB_USER}
+      CART_DB_PASSWORD: ${CART_DB_PASSWORD}
+      EUREKA_URL: ${EUREKA_URL}
     depends_on:
       - cart-db
 
@@ -106,9 +114,9 @@ services:
     image: postgres:16
     container_name: carts_db
     environment:
-      POSTGRES_USER: cart
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: carts_db
+      POSTGRES_USER: ${CART_DB_USER}
+      POSTGRES_PASSWORD: ${CART_DB_PASSWORD}
+      POSTGRES_DB: ${CART_DB_NAME}
     ports:
       - "5435:5432"
     volumes:
@@ -121,10 +129,12 @@ services:
       - "8084:8084"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      DB_HOST: order-db
-      DB_PORT: 5432
-      DB_USER: order
-      DB_PASS: password
+      ORDER_DB_HOST: ${ORDER_DB_HOST}
+      ORDER_DB_PORT: ${ORDER_DB_PORT}
+      ORDER_DB_NAME: ${ORDER_DB_NAME}
+      ORDER_DB_USER: ${ORDER_DB_USER}
+      ORDER_DB_PASSWORD: ${ORDER_DB_PASSWORD}
+      EUREKA_URL: ${EUREKA_URL}
     depends_on:
       - order-db
 
@@ -132,13 +142,14 @@ services:
     image: postgres:16
     container_name: order-db
     environment:
-      POSTGRES_USER: order
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: orders_db
+      POSTGRES_USER: ${ORDER_DB_USER}
+      POSTGRES_PASSWORD: ${ORDER_DB_PASSWORD}
+      POSTGRES_DB: ${ORDER_DB_NAME}
     ports:
       - "5436:5432"
     volumes:
       - order_db_data:/var/lib/postgresql/data
+
   payment-service:
     build: ./payment-service
     container_name: payment-service
@@ -146,10 +157,14 @@ services:
       - "8085:8085"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      DB_HOST: payment-db
-      DB_PORT: 5432
-      DB_USER: payment
-      DB_PASS: password
+      PAYMENT_DB_HOST: ${PAYMENT_DB_HOST}
+      PAYMENT_DB_PORT: ${PAYMENT_DB_PORT}
+      PAYMENT_DB_NAME: ${PAYMENT_DB_NAME}
+      PAYMENT_DB_USER: ${PAYMENT_DB_USER}
+      PAYMENT_DB_PASSWORD: ${PAYMENT_DB_PASSWORD}
+      STRIPE_SK: ${STRIPE_SK}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      EUREKA_URL: ${EUREKA_URL}
     depends_on:
       - payment-db
 
@@ -157,13 +172,14 @@ services:
     image: postgres:16
     container_name: payment-db
     environment:
-      POSTGRES_USER: payment
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: payments_db
+      POSTGRES_USER: ${PAYMENT_DB_USER}
+      POSTGRES_PASSWORD: ${PAYMENT_DB_PASSWORD}
+      POSTGRES_DB: ${PAYMENT_DB_NAME}
     ports:
       - "5437:5432"
     volumes:
       - payment_db_data:/var/lib/postgresql/data
+
   notification-service:
     build: ./notification-service
     container_name: notification-service
@@ -171,10 +187,13 @@ services:
       - "8086:8086"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      DB_HOST: notification-db
-      DB_PORT: 5432
-      DB_USER: notification
-      DB_PASS: password
+      NOTIFICATION_DB_HOST: ${NOTIFICATION_DB_HOST}
+      NOTIFICATION_DB_PORT: ${NOTIFICATION_DB_PORT}
+      NOTIFICATION_DB_NAME: ${NOTIFICATION_DB_NAME}
+      NOTIFICATION_DB_USER: ${NOTIFICATION_DB_USER}
+      NOTIFICATION_DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      EUREKA_URL: ${EUREKA_URL}
     depends_on:
       - notification-db
 
@@ -182,9 +201,9 @@ services:
     image: postgres:16
     container_name: notification-db
     environment:
-      POSTGRES_USER: notification
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: notifications_db
+      POSTGRES_USER: ${NOTIFICATION_DB_USER}
+      POSTGRES_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+      POSTGRES_DB: ${NOTIFICATION_DB_NAME}
     ports:
       - "5438:5432"
     volumes:
@@ -197,6 +216,7 @@ services:
       - "8761:8761"
     environment:
       SPRING_PROFILES_ACTIVE: docker
+
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
@@ -204,8 +224,10 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      EUREKA_URL: ${EUREKA_URL}
     depends_on:
       - eureka
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -216,15 +238,18 @@ services:
       - prometheus_data:/prometheus
 
   grafana:
-    image:  grafana/grafana:latest
+    image: grafana/grafana:latest
     ports:
       - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS}
       - bootstrap.memory_lock=true
       - xpack.security.enabled=false
     ports:
@@ -244,7 +269,7 @@ services:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: ${LS_JAVA_OPTS}
     depends_on:
       - elasticsearch
 
@@ -252,12 +277,12 @@ services:
     image: docker.elastic.co/kibana/kibana:7.17.0
     container_name: kibana
     ports:
-        - "5601:5601"
+      - "5601:5601"
     environment:
-        ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-        ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+      ELASTICSEARCH_URL: http://elasticsearch:9200
     depends_on:
-        - elasticsearch
+      - elasticsearch
 
 volumes:
   user_db_data:
