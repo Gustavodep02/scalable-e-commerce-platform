@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-db
+  template:
+    metadata:
+      labels:
+        app: cart-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secret
+                  key: CART_DB_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secret
+                  key: CART_DB_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: CART_DB_NAME
+          volumeMounts:
+            - name: cart-db-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: cart-db-data
+          persistentVolumeClaim:
+            claimName: cart-db-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cart-db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+

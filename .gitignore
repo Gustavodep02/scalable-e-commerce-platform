@@ -3,6 +3,14 @@
 *.env
 !.env.example
 
+# K8s secrets
+k8s/secret.yaml
+!k8s/secret.yaml.example
+
+# K8s config
+k8s/config.yaml
+!k8s/config.yaml.example
+
 # IDE
 .idea/
 *.iml

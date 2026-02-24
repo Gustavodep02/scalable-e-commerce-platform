@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+        - name: logstash
+          image: docker.elastic.co/logstash/logstash:7.17.0
+          ports:
+            - containerPort: 5044
+            - containerPort: 5000
+            - containerPort: 9600
+          env:
+            - name: LS_JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: LS_JAVA_OPTS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+spec:
+  selector:
+    app: logstash
+  ports:
+    - name: beats
+      port: 5044
+      targetPort: 5044
+    - name: tcp
+      port: 5000
+      targetPort: 5000
+    - name: api
+      port: 9600
+      targetPort: 9600
+  type: ClusterIP
+
