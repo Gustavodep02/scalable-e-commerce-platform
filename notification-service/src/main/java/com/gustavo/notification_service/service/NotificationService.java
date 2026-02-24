@@ -20,10 +20,12 @@ public class NotificationService {
     private final UserClient userClient;
     @Value("${sendgrid.api.key}")
     private String apikey;
+    @Value("${sendgrid.from.email}")
+    private String fromEmail;
     public void sendNotificationCancelled(JsonMessage message) {
         String emailTo = userClient.getUser(message.getUserId()).email();
 
-        Email from = new Email("gdepaulay@hotmail.com");
+        Email from = new Email(fromEmail);
         Email to = new Email(emailTo);
         String subject = "Order Notification";
         Content content = new Content("text/plain", "Your order has been cancelled.");
@@ -44,7 +46,7 @@ public class NotificationService {
     public void sendNotificationPaid(JsonMessage message) {
         String emailTo = userClient.getUser(message.getUserId()).email();
 
-        Email from = new Email("gdepaulay@hotmail.com");
+        Email from = new Email(fromEmail);
         Email to = new Email(emailTo);
         String subject = "Order Notification";
         Content content = new Content("text/plain", "Your order has been paid.");
@@ -65,7 +67,7 @@ public class NotificationService {
     public void sendNotificationCreated(JsonMessage message) {
         String emailTo = userClient.getUser(message.getUserId()).email();
 
-        Email from = new Email("gdepaulay@hotmail.com");
+        Email from = new Email(fromEmail);
         Email to = new Email(emailTo);
         String subject = "Order Notification";
         Content content = new Content("text/plain", "Your order has been created.");

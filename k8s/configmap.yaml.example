@@ -39,6 +39,9 @@ data:
   # Spring Profile
   SPRING_PROFILES_ACTIVE: "docker"
 
+  # SendGrid
+  SENDGRID_FROM_EMAIL: "your-verified-email@example.com"
+
   # Elasticsearch
   ES_JAVA_OPTS: "-Xms512m -Xmx512m"
 
