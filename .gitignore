@@ -7,9 +7,9 @@
 k8s/secret.yaml
 !k8s/secret.yaml.example
 
-# K8s config
-k8s/config.yaml
-!k8s/config.yaml.example
+# K8s configmap
+k8s/configmap.yaml
+!k8s/configmap.yaml.example
 
 # IDE
 .idea/
