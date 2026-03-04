@@ -1,6 +1,6 @@
 # 🛒 Scalable E-Commerce Platform
 
-A scalable e-commerce platform built with **microservices architecture** using **Spring Boot**, **Docker**, and **Kubernetes**. The platform handles product catalog management, user authentication, shopping cart, payment processing, order management, and email notifications — each as an independent microservice.
+A scalable e-commerce platform built with **microservices architecture** using **Spring Boot**, **Docker**, and **Kubernetes**. The platform handles product catalog management, user authentication, shopping cart, payment processing, order management, and email notifications each one as an independent microservice.
 
 > 📌 This project is based on the [Scalable E-Commerce Platform](https://roadmap.sh/projects/scalable-ecommerce-platform) challenge from [roadmap.sh](https://roadmap.sh).
 
@@ -14,25 +14,22 @@ A scalable e-commerce platform built with **microservices architecture** using *
                          │   :8080      │
                          └──────┬───────┘
                                 │
-                         ┌──────┴───────┐
-                         │    Eureka    │ (Service Discovery)
-                         │    :8761     │
-                         └──────┬───────┘
-                                │
-        ┌───────────┬───────────┼───────────┬───────────┬───────────┐
-        │           │           │           │           │           │
+                         ┌──────┴──────┐
+                         │    Eureka   │ (Service Discovery)
+                         │    :8761    │
+                         └─────┬───────┘
+                               │
+        ┌───────────┬──────────┼───────────┬───────────┬──────────┐
+        │           │          │           │           │          │
   ┌─────┴─────┐ ┌───┴───┐ ┌────┴────┐ ┌────┴────┐ ┌────┴────┐ ┌───┴────────┐
   │   User    │ │Product│ │  Cart   │ │  Order  │ │ Payment │ │Notification│
   │  Service  │ │Service│ │ Service │ │ Service │ │ Service │ │  Service   │
   │   :8081   │ │ :8082 │ │  :8083  │ │  :8084  │ │  :8085  │ │   :8086    │
   └─────┬─────┘ └───┬───┘ └────┬────┘ └────┬────┘ └────┬────┘ └─────┬──────┘
-        │           │          │           │           │             │
+        │           │          │           │           │            │
       [DB]        [DB]       [DB]        [DB]        [DB]          [DB]
     PostgreSQL  PostgreSQL PostgreSQL  PostgreSQL  PostgreSQL    PostgreSQL
 ```
-
-**Event-driven communication** between services via **Apache Kafka** (e.g., order created → payment processing → notification).
-
 ---
 
 ## 🧰 Technologies Used
